@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criador de Urnas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <header>
+            <h1><i class="fa-solid fa-box-ballot"></i> Criador de Urnas</h1>
+            <div class="status-row">
+                <span class="status-badge config" id="statusBadge">Configuração</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- SCREEN 1: CONFIG -->
+            <section class="screen active panel" id="configScreen">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-gear"></i> Configuração da Eleição</h2>
+                </div>
+                <div class="panel-body" style="display:grid;grid-template-columns:1fr 360px;gap:20px;height:100%;min-height:0;">
+                    <!-- LEFT: Candidates -->
+                    <div style="display:flex;flex-direction:column;height:100%;min-height:0;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                            <span style="font-size:0.88rem;font-weight:500;color:var(--text-light)">Candidatos</span>
+                            <div style="flex:1;height:1px;background:var(--border)"></div>
+                        </div>
+                        <div class="form-row" style="margin-bottom:12px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Número (2 dígitos)</label>
+                                <div class="otp-container" style="margin:0;gap:8px;justify-content:flex-start;">
+                                    <input type="text" class="otp-input" id="candNum1" maxlength="1" inputmode="numeric" aria-label="Primeiro dígito">
+                                    <input type="text" class="otp-input" id="candNum2" maxlength="1" inputmode="numeric" aria-label="Segundo dígito">
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Nome</label>
+                                <input type="text" id="candidateName" placeholder="Nome do candidato">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="addCandidate" style="width:100%;margin-bottom:12px;">
+                            <i class="fa-solid fa-plus"></i> Adicionar Candidato
+                        </button>
+                        <ul class="candidate-list" id="candidateList" style="flex:1;overflow-y:auto;max-height:none;"></ul>
+                    </div>
+
+                    <!-- RIGHT: Options -->
+                    <div style="display:flex;flex-direction:column;gap:16px;padding-top:4px;">
+                        <div class="form-group">
+                            <label>
+                                Senha de Administrador
+                                <span style="font-size:0.75rem;color:var(--text-light);font-weight:400">Mín. 4 caracteres</span>
+                            </label>
+                            <input type="password" id="adminPassword" placeholder="••••" minlength="4" autocomplete="new-password">
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                Voto em Branco
+                                <div class="toggle" role="switch" aria-label="Permitir voto em branco">
+                                    <input type="checkbox" id="allowBlank" checked>
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                Voto Nulo
+                                <div class="toggle" role="switch" aria-label="Permitir voto nulo">
+                                    <input type="checkbox" id="allowNull" checked>
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="btn-group">
+                        <button class="btn btn-danger" id="clearAll">
+                            <i class="fa-solid fa-trash"></i> Limpar Tudo
+                        </button>
+                        <button class="btn btn-primary" id="startElection">
+                            <i class="fa-solid fa-play"></i> Iniciar Eleição
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SCREEN 2: VOTING -->
+            <section class="screen panel" id="votingScreen">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-check-circle"></i> Votação</h2>
+                </div>
+                <div class="panel-body" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
+                    <p style="color:var(--text-light);margin-bottom:16px;font-size:0.95rem">Digite o número do candidato</p>
+
+                    <div class="otp-container" id="otpContainer">
+                        <input type="text" class="otp-input" maxlength="1" data-index="0" inputmode="numeric" aria-label="Primeiro dígito">
+                        <input type="text" class="otp-input" maxlength="1" data-index="1" inputmode="numeric" aria-label="Segundo dígito">
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="btn-group">
+                        <button class="btn btn-branco btn-sm" id="btnBlank" disabled>
+                            <i class="fa-solid fa-circle"></i> Branco (B)
+                        </button>
+                        <button class="btn btn-nulo btn-sm" id="btnNull" disabled>
+                            <i class="fa-solid fa-ban"></i> Nulo (N)
+                        </button>
+                        <button class="btn btn-primary" id="confirmVote" disabled>
+                            <i class="fa-solid fa-check"></i> Confirmar
+                        </button>
+                    </div>
+                    <button class="btn btn-admin btn-block btn-sm" id="openMenu" style="margin-top:10px">
+                        <i class="fa-solid fa-lock"></i> Menu do Administrador
+                    </button>
+                </div>
+            </section>
+
+            <!-- SCREEN 3: ADMIN OPTIONS -->
+            <section class="screen panel" id="adminOptionsScreen">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-sliders"></i> Opções do Administrador</h2>
+                </div>
+                <div class="panel-body" style="display:flex;flex-direction:column;gap:12px;">
+                    <button class="btn btn-danger btn-block" id="endElection">
+                        <i class="fa-solid fa-stop"></i> Encerrar Eleição
+                    </button>
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-secondary btn-block" id="backToVoting2">
+                        <i class="fa-solid fa-arrow-left"></i> Voltar à Votação
+                    </button>
+                </div>
+            </section>
+
+            <!-- SCREEN 5: RESULTS -->
+            <section class="screen panel" id="resultsScreen">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-chart-bar"></i> Resultado da Eleição</h2>
+                </div>
+                <div class="panel-body" style="overflow-y:auto;min-height:0;">
+                    <div class="results-list" id="resultsContainer"></div>
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-danger btn-block" id="clearAllResults">
+                        <i class="fa-solid fa-trash"></i> Limpar Tudo e Recomeçar
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Vote Popup -->
+    <div class="vote-popup-overlay" id="votePopup" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
+        <div class="vote-popup">
+            <div class="label" id="popupTitle">Você votará em</div>
+            <div class="number" id="popupNumber">--</div>
+            <div class="name" id="popupName">Aguardando...</div>
+            <div class="type" id="popupType"></div>
+            <div class="warning hidden" id="popupWarning"></div>
+        </div>
+    </div>
+
+    <!-- Modal (senha) -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3 id="modalTitle">Confirmação</h3>
+            <p id="modalMessage"></p>
+            <div class="form-group">
+                <input type="password" id="modalPassword" placeholder="Senha de administrador" autocomplete="current-password">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="modalCancel">Cancelar</button>
+                <button class="btn btn-primary" id="modalConfirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal (sim/não) -->
+    <div class="modal-overlay" id="confirmModalOverlay">
+        <div class="modal">
+            <h3 id="confirmModalTitle">Confirmação</h3>
+            <p id="confirmModalMessage"></p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="confirmModalNo">Não</button>
+                <button class="btn btn-primary" id="confirmModalYes">Sim</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
