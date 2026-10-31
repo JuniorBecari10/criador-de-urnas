@@ -361,6 +361,11 @@ function startElection() {
     state.candidates.forEach(c => state.votes[c.number] = 0);
     state.votes.branco = 0; state.votes.nulo = 0;
     saveState();
+
+    // Clear candidate input boxes (number OTP + name) but keep admin password
+    resetCandidateOTP();
+    document.getElementById('candidateName').value = '';
+
     updateUIForStatus();
     showToast('Eleição iniciada', 'success');
 }
@@ -372,6 +377,13 @@ function doEndElection() {
     saveState();
     updateUIForStatus();
     showToast('Eleição encerrada', 'success');
+}
+
+function goBackToConfig() {
+    state.status = 'config';
+    saveState();
+    updateUIForStatus();
+    showToast('Retornou à configuração', 'info');
 }
 
 function requestClearAll() {
@@ -473,6 +485,7 @@ function setupEventListeners() {
     document.getElementById('backToVoting2').addEventListener('click', () => showScreen('voting'));
 
     document.getElementById('clearAllResults').addEventListener('click', requestClearAll);
+    document.getElementById('backToConfig').addEventListener('click', goBackToConfig);
 
     document.getElementById('modalCancel').addEventListener('click', () => { modalOverlay.classList.remove('active'); pendingAction=null; });
     document.getElementById('modalConfirm').addEventListener('click', () => {
